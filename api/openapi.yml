@@ -1,0 +1,976 @@
+openapi: 3.0.1
+info:
+  title: Workspace Engine
+  version: 0.0.1
+servers:
+- description: Development server
+  url: http://localhost/dev/api
+- description: Development server with TLS Profile
+  url: https://d5d70ed8-4320-4d2f-9864-29202791adc0.dev.officekube.io/dev/api
+security:
+- oauth:
+  - jhipster
+  - email
+  - profile
+- openId:
+  - jhipster
+  - email
+  - profile
+paths:
+  /workflows/execute:
+    post:
+      tags:
+      - Workflow Endpoints
+      requestBody:
+        content:
+          application/json:
+            example:
+              path: pull-git-repository
+              web_url: https://workflow.officekube.io/platform-workflows/pull-git-repository
+              topics:
+              - type=task
+              - target=workspace
+              name: Pull Git Repository
+              description: This task will pull a git repository using a username and a personal access token.
+              default_branch: main
+              id: 20
+              http_url_to_repo: https://workflow.officekube.io/platform-workflows/pull-git-repository.git
+              parameters:
+                - name: token
+                  description: Reserved parameter that indicates if the workflow needs to use a token
+                  displayed: false
+                  allowed_values: 
+                  - officekube
+                  - github
+                  actual_values:
+                  - officekube
+                  type: string
+                  required: true
+                - name: repo_url
+                  description: Git Repo Url
+                  displayed: true
+                  type: string
+                  usage: Please provide an https URL to your git repository.
+                  required: true
+                  masked: false
+                  actual_values:
+                  - https://workflow.officekube.io/platform-workflows/pull-git-repository.git
+                - name: dir
+                  actual_values:
+                  - /work/test
+            schema:
+              $ref: '#/components/schemas/AWorkflow'
+        required: true
+      responses:
+        "200":
+          description: Output of the task
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          description: Failed to execute the task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AResult'
+      summary: The method executes passed in workflow.
+  /workflows/history:
+    get:
+      tags:
+      - Workflow Endpoints
+      summary: "The method returns a list of prevoiusly executed tasks."
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListOfAWorkflows'
+          description: Success
+        "404":
+          content:
+            text/html:
+              schema:
+                type: string
+          description: No tasks were executed before.
+  /workflows/schedule:
+    post:
+      tags:
+      - Workflow Endpoints
+      requestBody:
+        content:
+          application/json:
+            example:
+              path: generate-java-application-from-jdl-model
+              web_url: https://workflow.officekube.io/platform-workflows/generate-java-application-from-jdl-model
+              topics:
+              - type=task
+              - target=workspace
+              - workspace=Java Developer Workspace
+              name: Generate Java Application from JDL Model
+              description: This task will generate a java application using a passed in jdl model.
+              default_branch: main
+              id: 3
+              http_url_to_repo: https://workflow.officekube.io/platform-workflows/generate-java-application-from-jdl-model.git
+              parameters:
+                - name: token
+                  description: Reserved parameter that indicates if the workflow needs to use a token
+                  displayed: false
+                  allowed_values: 
+                  - officekube
+                  - github
+                  actual_values:
+                  - officekube
+                  type: string
+                  required: true
+                - name: gitRepoUrl
+                  description: Git Repo Url
+                  displayed: true
+                  type: string
+                  usage: Please provide an https URL to your git repository.
+                  required: true
+                  masked: false
+                  actual_values:
+                  - https://github.com/coder/code-server.git
+              schedule:
+                start: true
+                end: false
+            schema:
+              $ref: '#/components/schemas/AWorkflow'
+        required: true
+      responses:
+        "200":
+          description: Output of the task
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          description: Failed to execute the task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AResult'
+      summary: The method schedules a passed in project
+  /workflows/view:
+    post:
+      tags:
+      - "Workflow Endpoints"
+      requestBody:
+        content:
+          application/json:
+            example:
+              aworkflow:
+                id: 121
+                name: Application Skeleton
+                path: application-skeleton
+                web_url: https://workflow.officekube.io/platform-workflows/application-skeleton
+                http_url_to_repo: https://workflow.officekube.io/platform-workflows/application-skeleton.git
+                topics:
+                - type=prompt
+                parameters:
+                - name: ok_prompt
+                  description: Special parameter used for the prompt workflow
+                  displayed: false
+                  type: string
+                  required: true
+                - name: code_language
+                  displayed: false
+                  type: string
+                  required: true
+                  masked: false
+                  allowed_values: 
+                  - val1
+                  - val2
+                - name: framework
+                  displayed: false
+                  type: string
+                  required: true
+                  masked: false
+                  allowed_values: 
+                  - val1
+                  - val2
+                - name: multi_choice_param
+                  displayed: false
+                  type: array
+                  required: true
+                  masked: false
+                  allowed_values: 
+                  - val1
+                  - val2
+                - name: checkbox_param
+                  displayed: false
+                  type: boolean
+                  required: true
+                  masked: false
+                - name: editbox_param
+                  displayed: false
+                  type: string
+                  required: true
+                  masked: false
+              status: WORKFLOW_VIEWED
+              workspaceId: d5d70ed8-4320-4d2f-9864-29202791adc0
+              timestamp: "2022-09-29T19:20:00Z"
+            schema:
+              $ref: '#/components/schemas/AUsedWorkflow'
+        required: true
+      responses:
+        "200":
+          content:
+            text/html:
+              schema:
+                type: string
+          description: Success
+        "404":
+          content:
+            text/html:
+              schema:
+                type: string
+          description: readme.rst not found because either passed project id is not valid or the project does not have readme.rst
+      summary: "The method returns an html content of the readme.rst that belongs to the platform repo of the passed in project id."
+  /workflows/estimate:
+    post:
+      tags:
+      - "Workflow Endpoints"
+      requestBody:
+        content:
+          application/json:
+            example:
+              aworkflow:
+                id: 121
+                name: Application Skeleton
+                path: application-skeleton
+                web_url: https://workflow.officekube.io/platform-workflows/application-skeleton
+                http_url_to_repo: https://workflow.officekube.io/platform-workflows/application-skeleton.git
+                topics:
+                - type=prompt
+                parameters:
+                - name: ok_prompt
+                  description: Special parameter used for the prompt workflow
+                  displayed: false
+                  type: string
+                  required: true
+                  actual_values:
+                  - Generate app skeleton
+              status: WORKFLOW_VIEWED
+              workspaceId: d5d70ed8-4320-4d2f-9864-29202791adc0
+              timestamp: "2022-09-29T19:20:00Z"
+            schema:
+              $ref: '#/components/schemas/AUsedWorkflow'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+              example: { Amount: '$0.4', Units: '1000', UoM: 'tokens' }
+          description: an instance of WorkflowInstance 
+      summary: "The method provides an estimate of a cost for a premium workflow."
+  /engine/config:
+    get:
+      tags:
+      - Engine Endpoints
+      summary: "The method returns a configuration to be used by the engine's frontend."
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+              example: { FirstTimeDialogYTUrl: 'https://www.youtube.com/watch?v=32eywT-bQhQ',
+                       FirstTimeLaunched: true,
+                       CreateTaskScaffoldingTaskId: 24 }
+                       
+          description: Success
+        "404":
+          content:
+            text/html:
+              schema:
+                type: string
+          description: No configuration exists.
+  /engine/runStartupTasks:
+    get:
+      tags:
+      - Engine Endpoints
+      summary: "The method executes all startup tasks."
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AResult'
+          description: Success
+        "404":
+          content:
+            text/html:
+              schema:
+                type: string
+          description: No tasks to execute.
+  /engine/activity:
+    post:
+      tags:
+      - Engine Endpoints
+      summary: "Post activity status of workspace from ui."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityStatus'
+        required: true
+      responses:
+        "200":
+          description: Success
+        "404":
+          content:
+            text/html:
+              schema:
+                type: string
+          description: Invalid.
+    get:
+      tags:
+      - Engine Endpoints
+      summary: "Get activity status of workspace."
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityStatus'
+        "404":
+          content:
+            text/html:
+              schema:
+                type: string
+          description: Invalid.
+  /apps:
+    get:
+      tags:
+      - Application Endpoints
+      summary: "The method returns a list of apps installed on the workspae."
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListOfApps'
+          description: Success
+        "404":
+          content:
+            text/html:
+              schema:
+                type: string
+          description: No installed apps.
+  /apps/install:
+    post:
+      tags:
+      - Application Endpoints
+      requestBody:
+        content:
+          application/json:
+            example:
+              path: storybook
+              web_url: https://workflow.officekube.io/app-workflows/storybook
+              topics:
+              - type=app
+              - target=workspace
+              name: Storybook
+              description: This app is a frontend workshop.
+              default_branch: dev
+              project_id: 104
+              type: installed
+              http_url_to_repo: https://workflow.officekube.io/app-workflows/storybook.git
+              parameters:
+                - name: project_dir
+                  description: Path to the codebase
+                  displayed: true
+                  type: string
+                  usage: Please provide a local path to your app codebase.
+                  required: true
+                  masked: false
+                  default: /work/wsp-ui
+                  actual_values:
+                  - /work/wsp-ui
+            schema:
+              $ref: '#/components/schemas/AApp'
+        required: true
+      responses:
+        "200":
+          description: Output of the app
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          description: Failed to install the app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AResult'
+      summary: The method installs a passed in app.
+  /apps/uninstall:
+    post:
+      tags:
+      - Application Endpoints
+      requestBody:
+        content:
+          application/json:
+            example:
+              path: storybook
+              web_url: https://workflow.officekube.io/app-workflows/storybook
+              topics:
+              - type=app
+              - target=workspace
+              name: Storybook
+              description: This app is a frontend workshop.
+              default_branch: dev
+              project_id: 104
+              type: installed
+              http_url_to_repo: https://workflow.officekube.io/app-workflows/storybook.git
+              parameters:
+                - name: project_dir
+                  description: Path to the codebase
+                  displayed: true
+                  type: string
+                  usage: Please provide a local path to your app codebase.
+                  required: true
+                  masked: false
+                  default: /work/wsp-ui
+                  actual_values:
+                  - /work/wsp-ui
+            schema:
+              $ref: '#/components/schemas/AApp'
+        required: true
+      responses:
+        "200":
+          description: Output of the app
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          description: Failed to uninstall the app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AResult'
+      summary: The method uninstalls a passed in app.
+  /apps/execute:
+    post:
+      tags:
+      - Application Endpoints
+      requestBody:
+        content:
+          application/json:
+            example:
+              path: storybook
+              web_url: https://workflow.officekube.io/app-workflows/storybook
+              topics:
+              - type=app
+              - target=workspace
+              name: Storybook
+              description: This app is a frontend workshop.
+              default_branch: dev
+              project_id: 104
+              type: installed
+              http_url_to_repo: https://workflow.officekube.io/app-workflows/storybook.git
+              parameters:
+                - name: project_dir
+                  description: Path to the codebase
+                  displayed: true
+                  type: string
+                  usage: Please provide a local path to your app codebase.
+                  required: true
+                  masked: false
+                  default: /work/wsp-ui
+                  actual_values:
+                  - /work/wsp-ui
+            schema:
+              $ref: '#/components/schemas/AApp'
+        required: true
+      responses:
+        "200":
+          description: Output of the app
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          description: Failed to execute the app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AResult'
+      summary: The method executes a passed in app.
+  /apps/start:
+    post:
+      tags:
+      - Application Endpoints
+      requestBody:
+        content:
+          application/json:
+            example:
+              path: storybook
+              web_url: https://workflow.officekube.io/app-workflows/storybook
+              topics:
+              - type=app
+              - target=workspace
+              name: Storybook
+              description: This app is a frontend workshop.
+              default_branch: dev
+              project_id: 104
+              type: installed
+              http_url_to_repo: https://workflow.officekube.io/app-workflows/storybook.git
+              parameters:
+                - name: project_dir
+                  description: Path to the codebase
+                  displayed: true
+                  type: string
+                  usage: Please provide a local path to your app codebase.
+                  required: true
+                  masked: false
+                  default: /work/wsp-ui
+                  actual_values:
+                  - /work/wsp-ui
+            schema:
+              $ref: '#/components/schemas/AApp'
+        required: true
+      responses:
+        "200":
+          description: Output of the app
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          description: Failed to start the app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AResult'
+      summary: The method starts a passed in app.
+  /apps/stop:
+    post:
+      tags:
+      - Application Endpoints
+      requestBody:
+        content:
+          application/json:
+            example:
+              path: storybook
+              web_url: https://workflow.officekube.io/app-workflows/storybook
+              topics:
+              - type=app
+              - target=workspace
+              name: Storybook
+              description: This app is a frontend workshop.
+              default_branch: dev
+              project_id: 104
+              type: installed
+              http_url_to_repo: https://workflow.officekube.io/app-workflows/storybook.git
+              parameters:
+                - name: project_dir
+                  description: Path to the codebase
+                  displayed: true
+                  type: string
+                  usage: Please provide a local path to your app codebase.
+                  required: true
+                  masked: false
+                  default: /work/wsp-ui
+                  actual_values:
+                  - /work/wsp-ui
+            schema:
+              $ref: '#/components/schemas/AApp'
+        required: true
+      responses:
+        "200":
+          description: Output of the app
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          description: Failed to stop the app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AResult'
+      summary: The method stops a passed in app.
+  /assistant/files:
+        post:
+            tags:
+                - "Assistant Endpoints"
+            summary: "Get files from a specific directory"
+            description: "This endpoint returns the contents of a specified directory based on the provided request parameters."
+            requestBody:
+                required: true
+                content:
+                  application/json:
+                    example:
+                      Action: read
+                      Path: /
+                      ShowHiddenItems: true
+                      Data: []
+                    schema:
+                        $ref: '#/components/schemas/FileRequest'
+            responses:
+                "200":
+                    description: "Successfully retrieved directory contents"
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    cwd:
+                                        $ref: '#/components/schemas/ApiAssistantFileItem'
+                                    files:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/ApiAssistantFileItem'
+                "400":
+                    description: "Bad request when the request body is not valid"
+                    content:
+                        text/plain:
+                            schema:
+                                type: string
+                "401":
+                    description: "Unauthorized access"
+                    content:
+                        text/plain:
+                            schema:
+                                type: string
+                "500":
+                    description: "Internal server error when reading the directory"
+                    content:
+                        text/plain:
+                            schema:
+                                type: string
+components:
+  responses:
+    Problem:
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+      description: error occurred - see status code and problem object for more information.
+  schemas:
+    FileRequest:
+      type: object
+      properties:
+        Action:
+          type: string
+          description: "The action to be performed."
+        Path:
+          type: string
+          description: "The directory path to read."
+        ShowHiddenItems:
+          type: boolean
+          description: "Flag to indicate if hidden items should be shown."
+        Data:
+          type: array
+          items:
+            type: string
+          description: "Additional data for the request."
+    ApiAssistantFileItem:
+      type: object
+      properties:
+        Name:
+          type: string
+        Size:
+          type: integer
+        DateModified:
+          type: string
+          format: date-time
+        DateCreated:
+          type: string
+          format: date-time
+        HasChild:
+          type: boolean
+        IsFile:
+          type: boolean
+    ActivityStatus:
+      example:
+        activeness: 1
+      properties:
+        activeness:
+          type: integer
+      title: API request body to show active status from ui
+      type: object
+    AResult:
+      example:
+        code: 0
+        message: message
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      title: API Result Object used to deliver a result of an API call to the client
+      type: object
+    AWorkflow:
+      example:
+        path: path
+        web_url: web_url
+        topics:
+        - type=workflow
+        - target=workspace
+        - workspace=Java Developer Workspace
+        name: name
+        description: description
+        default_branch: default_branch
+        id: 6
+        http_url_to_repo: http_url_to_repo
+      properties:
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        name_with_namespace:
+          type: string
+        description:
+          type: string
+        path:
+          title: Relative path to the workflow repo
+          type: string
+        path_with_namespace:
+          title: Relative path to the workflow repo
+          type: string
+        default_branch:
+          title: Default branch in repo
+          type: string
+        topics:
+          items:
+            type: string
+          title: An array of topics that the workflow is tagged with
+          type: array
+        http_url_to_repo:
+          title: http url to the workflow repo
+          type: string
+        web_url:
+          title: Web url to the workflow repo
+          type: string
+        start_count:
+          title: Star count
+          type: number
+        parameters:
+          additionalProperties:
+            $ref: '#/components/schemas/AWorkflowParameter'
+        schedule:
+          $ref: '#/components/schemas/ASchedule'
+      required:
+      - id
+      title: API Wrapper Object for WSPEngine.execute API
+      type: object
+    AWorkflowParameter:
+      title: API Wrapper Object for AWorkflow.parameters property
+      type: object
+      properties:
+        name:
+          type: string
+        description: 
+          type: string
+        usage: 
+          type: string
+        displayed: 
+          type: boolean
+        type: 
+          type: string
+        format: 
+          type: string
+        default:
+          type: string
+        required: 
+          type: boolean
+        allowed_values: 
+          items:
+            type: string
+          type: array
+        masked: 
+          type: boolean
+        actual_values: 
+          items:
+            type: string
+          type: array
+    ListOfAWorkflows:
+      type: object
+      properties:
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/AWorkflow'
+    ASchedule:
+      properties:
+        start:
+          type: boolean
+        end:
+          type: boolean
+    Problem:
+      properties:
+        type:
+          default: about:blank
+          description: |
+            An absolute URI that identifies the problem type.  When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          example: https://zalando.github.io/problem/constraint-violation
+          format: uri
+          type: string
+        title:
+          description: |
+            A short, summary of the problem type. Written in english and readable
+            for engineers (usually not suited for non technical stakeholders and
+            not localized); example: Service Unavailable
+          type: string
+        status:
+          description: |
+            The HTTP status code generated by the origin server for this occurrence
+            of the problem.
+          example: 503
+          exclusiveMaximum: true
+          format: int32
+          maximum: 600
+          minimum: 100
+          type: integer
+        detail:
+          description: |
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: Connection to database timed out
+          type: string
+        instance:
+          description: |
+            An absolute URI that identifies the specific occurrence of the problem.
+            It may or may not yield further information if dereferenced.
+          format: uri
+          type: string
+      type: object
+    ListOfApps:
+      type: object
+      properties:
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/AApp'
+    AApp:
+      example:
+        path: path
+        web_url: web_url
+        topics:
+        - type=app
+        - target=workspace
+        - workspace=Java Developer Workspace
+        name: name
+        description: description
+        default_branch: default_branch
+        id: 6
+        http_url_to_repo: http_url_to_repo
+      properties:
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        name_with_namespace:
+          type: string
+        description:
+          type: string
+        path:
+          title: Relative path to the app repo
+          type: string
+        path_with_namespace:
+          title: Relative path to the app repo
+          type: string
+        default_branch:
+          title: Default branch in repo
+          type: string
+        topics:
+          items:
+            type: string
+          title: An array of topics that the app is tagged with
+          type: array
+        http_url_to_repo:
+          title: http url to the workflow repo
+          type: string
+        web_url:
+          title: Web url to the workflow repo
+          type: string
+        start_count:
+          title: Star count
+          type: number
+        parameters:
+          additionalProperties:
+            $ref: '#/components/schemas/AAppParameter'
+      required:
+      - id
+      title: API Wrapper Object for the App object
+      type: object
+    AAppParameter:
+      title: API Wrapper Object for AApp.parameters property
+      type: object
+      properties:
+        name:
+          type: string
+        description: 
+          type: string
+        usage: 
+          type: string
+        displayed: 
+          type: boolean
+        type: 
+          type: string
+        format: 
+          type: string
+        default:
+          type: string
+        required: 
+          type: boolean
+        allowed_values: 
+          items:
+            type: string
+          type: array
+        masked: 
+          type: boolean
+        actual_values: 
+          items:
+            type: string
+          type: array
+    AUsedWorkflow:
+      title: API Wrapper Object for a workflow used by a workspace engine.
+      type: object
+      required: [status, workspaceId]
+      properties:
+        aworkflow:
+          $ref: '#/components/schemas/AWorkflow'
+        workspaceId:
+          type: string
+          format: uuid
+        status:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+          description: Creation date and time
+          example: "2021-01-30T08:30:00Z"
+  securitySchemes:
+    oauth:
+      type: oauth2
+      description: OAuth2 authentication with KeyCloak
+      flows:
+        authorizationCode:
+          #authorizationUrl: http://localhost/auth/realms/jhipster/protocol/openid-connect/auth
+          #tokenUrl: http://localhost/auth/realms/jhipster/protocol/openid-connect/token
+          authorizationUrl: https://auth.officekube.io/realms/officekube-dev/protocol/openid-connect/auth
+          tokenUrl: https://auth.officekube.io/realms/officekube-dev/protocol/openid-connect/token
+          scopes:
+            jhipster: Jhipster specific claims
+            email: Email claims
+            profile: Profile claims
+    openId:
+      type: openIdConnect
+      description: OpenID Connect authentication with KeyCloak
+      #openIdConnectUrl: http://localhost/auth/realms/jhipster/.well-known/openid-configuration
+      openIdConnectUrl: https://auth.officekube.io/realms/officekube-dev/.well-known/openid-configuration

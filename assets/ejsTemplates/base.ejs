@@ -1,0 +1,72 @@
+<%- include('inputView') %>
+<!-- Code to transfer values from the template above to hidden fields -->
+<% hiddenParameters.forEach(function(parameter){ 
+    if (parameter.name == "ok_prompt") { %>
+        <input type="hidden" id="<%= parameter.name %>">
+<%  } else { %>
+        <input type="hidden" id="hidden-<%= parameter.name %>">
+<%  } %>
+<% }); %>
+
+<script>
+    function updateHiddenFields() {
+        var updatedPrompt = String.raw`<%= ok_prompt%>`;
+        // Get values from all parameter fields
+        <% hiddenParameters.forEach(function(parameter){ %>
+            // Not every parameter might actually be used in the template and, therefore will not be found by its id.
+            var <%= parameter.name %>Param = document.getElementById('<%= parameter.name %>');
+            if (<%= parameter.name %>Param != null) {
+
+            <% if (parameter.name != "ok_prompt" && parameter.type == "string") { %>
+
+                var <%= parameter.name %>Value = <%= parameter.name %>Param.value;
+
+        <%  } else if (parameter.name != "ok_prompt" && (parameter.type == "array")) { %>
+            
+                var <%= parameter.name %>Value;
+                var result = [];
+                var options = <%= parameter.name %>Param && <%= parameter.name %>Param.options;
+                var opt;
+
+                for (var i=0, iLen=options.length; i<iLen; i++) {
+                    opt = options[i];
+
+                    if (opt.selected) {
+                        result.push(opt.value);
+                    }
+                }
+                <%= parameter.name %>Value = result;
+            
+        <%  } else if (parameter.name != "ok_prompt" && (parameter.type == "boolean")) { %>
+
+                var <%= parameter.name %>Value = <%= parameter.name %>Param.checked;
+
+        <%  } 
+            if (parameter.name != "ok_prompt") {
+        %>
+
+                document.getElementById('hidden-<%= parameter.name %>').value = <%= parameter.name %>Value;
+                updatedPrompt = updatedPrompt.replace("{{{<%= parameter.name %>}}}", <%= parameter.name %>Value);
+        <% } %>
+            }
+        <% }); %>
+        document.getElementById('ok_prompt').value = updatedPrompt;
+    }
+    // Add event listeners
+    <% hiddenParameters.forEach(function(parameter){ %>
+            // Not every parameter might actually be used in the template and, therefore no need to add a listener.
+            var <%= parameter.name %>Param = document.getElementById('<%= parameter.name %>');
+            if (<%= parameter.name %>Param != null) {
+
+        <% if (parameter.name != "ok_prompt" && (parameter.type == "string" || parameter.type == "array")) { %>
+
+                <%= parameter.name %>Param.addEventListener('input', updateHiddenFields);
+
+    <%  } else if (parameter.name != "ok_prompt" && (parameter.type == "boolean")) { %>
+    
+                <%= parameter.name %>Param.addEventListener('change', updateHiddenFields);
+
+    <%  } %>
+            }    
+    <% }); %>
+</script>
