@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"runtime"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -128,8 +129,9 @@ type UserTokenPayload struct {
 func (ws *BaseWorkspaceService) GetWspEngineSettings(accessToken string, wspId string) ([]byte, error) {
 	var result []byte
 	client := http.Client{}
-	//FIXME: change the wsp service endpoint to accept parameters of version and OS so that the service returns configuration that is version and OS specific.
-	req, err := http.NewRequest("GET", Configuration.WorkspaceService.Endpoint + "/workspaces/" + wspId + "/engine/settings", nil)
+	endpoint := Configuration.WorkspaceService.Endpoint + "/workspaces/" + wspId + "/engine/settings"
+	endpoint += "?version=" + Configuration.Engine.Version + "&type=" + runtime.GOOS
+	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		log.Println("Failed to prep a call to the workspace service /workspaces/engine/settings API.")
 		return result, err

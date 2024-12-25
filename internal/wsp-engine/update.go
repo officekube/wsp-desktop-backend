@@ -88,7 +88,7 @@ func (um *UpdateManagerClass) downloadAndApplyUpdate(url string, updateType stri
         return fmt.Errorf("failed to parse content length: %w", err)
     }
 
-    tempFile, err := ioutil.TempFile("", "update-*.zip")
+    tempFile, err := os.CreateTemp("", "update-*.zip")
     if err != nil {
         return err
     }
@@ -188,11 +188,11 @@ func (um *UpdateManagerClass) copyAndReplace(src, dest string) error {
 					return err
 				}
 			} else {
-				input, err := ioutil.ReadFile(srcPath)
+				input, err := os.ReadFile(srcPath)
 				if err != nil {
 					return err
 				}
-				err = ioutil.WriteFile(destPath, input, entry.Mode())
+				err = os.WriteFile(destPath, input, entry.Mode())
 				if err != nil {
 					return err
 				}
@@ -215,11 +215,11 @@ func (um *UpdateManagerClass) copyAndReplace(src, dest string) error {
 
 		if len(relevantEntries) == 1 {
 			srcPath := filepath.Join(src, relevantEntries[0].Name())
-			input, err := ioutil.ReadFile(srcPath)
+			input, err := os.ReadFile(srcPath)
 			if err != nil {
 				return err
 			}
-			err = ioutil.WriteFile(dest, input, relevantEntries[0].Mode())
+			err = os.WriteFile(dest, input, relevantEntries[0].Mode())
 			if err != nil {
 				return err
 			}

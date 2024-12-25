@@ -21,7 +21,7 @@ func (plr *PlatformRepoAPI) GetRepoFileContent(token string, projectId int, file
 	var content string
 
 	client := http.Client{}
-	req, err := http.NewRequest("GET", Configuration.Gitlab.BaseUrl+"/projects/"+strconv.Itoa(projectId)+"/repository/files/"+fileName+"/raw?ref="+Configuration.Gitlab.WorkflowRepoBranch, nil)
+	req, err := http.NewRequest("GET", Configuration.OKWorkflowPlatform.BaseUrl+"/projects/"+strconv.Itoa(projectId)+"/repository/files/"+fileName+"/raw?ref="+Configuration.OKWorkflowPlatform.WorkflowRepoBranch, nil)
 	if err != nil {
 		log.Println("Failed to prep a call to the OK Platform Repo API.")
 		returnErr = 1
