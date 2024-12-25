@@ -3,7 +3,6 @@ package workspaceEngine
 import (
 	"context"
 	"log"
-	"runtime"
 	"sync"
 	"time"
 )
@@ -43,7 +42,7 @@ func (sww *BaseStartupWorkflowWorker) Init() (err *error) {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 
-    go sww.StartNewVersionCheck(runtime.GOOS + "-desktop")
+    go sww.StartNewVersionCheck("base")
 
 	return nil
 }
@@ -52,7 +51,6 @@ func (sww *BaseStartupWorkflowWorker) StartNewVersionCheck(wspType string) {
     ticker := time.NewTicker(NEWVERSIONCHECK_INTERVAL_IN_MINUTES * time.Minute)
     defer ticker.Stop()
 
-	// FIXME: Update the update table with the workspace type = "windows-desktop"
     for {
         select {
         case <-sww.Context.Done():
