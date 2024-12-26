@@ -1,0 +1,210 @@
+openapi: 3.0.0
+info:
+  title: LLM Router API
+  description: API for routing requests to different Large Language Models
+  version: 0.0.1
+servers:
+  - url: http://localhost/v1
+    description: Development server
+
+paths:
+  /route:
+    post:
+      summary: Route a prompt to the appropriate LLM
+      description: Routes the input prompt to the best-suited LLM based on specified parameters
+      operationId: routePrompt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteRequest'
+      responses:
+        '200':
+          description: Successful response from LLM
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /models:
+    get:
+      summary: Get available LLM models
+      description: Returns a list of all available LLM models and their capabilities
+      operationId: getModels
+      responses:
+        '200':
+          description: List of available models
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelsResponse'
+
+  /health:
+    get:
+      summary: Check API health
+      description: Returns the health status of the API and connected LLMs
+      operationId: getHealth
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  schemas:
+    RouteRequest:
+      type: object
+      required:
+        - prompt
+      properties:
+        prompt:
+          type: string
+          description: The input prompt to be processed
+        preferredModel:
+          type: string
+          description: Preferred LLM model (optional)
+        parameters:
+          type: object
+          description: Additional parameters for the LLM
+          properties:
+            temperature:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+              description: Sampling temperature
+            maxTokens:
+              type: integer
+              minimum: 1
+              description: Maximum number of tokens to generate
+            stopSequences:
+              type: array
+              items:
+                type: string
+              description: Sequences where the LLM should stop generating
+        context:
+          type: object
+          description: Additional context for routing decisions
+          properties:
+            priority:
+              type: string
+              enum: [low, medium, high]
+            timeout:
+              type: integer
+              description: Timeout in milliseconds
+
+    RouteResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Response ID
+        result:
+          type: string
+          description: Generated response from the LLM
+        model:
+          type: string
+          description: The LLM model that processed the request
+        usage:
+          type: object
+          properties:
+            promptTokens:
+              type: integer
+            completionTokens:
+              type: integer
+            totalTokens:
+              type: integer
+        metadata:
+          type: object
+          description: Additional metadata about the response
+
+    ModelsResponse:
+      type: object
+      properties:
+        models:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              provider:
+                type: string
+              capabilities:
+                type: array
+                items:
+                  type: string
+              maxTokens:
+                type: integer
+              pricing:
+                type: object
+                properties:
+                  inputPrice:
+                    type: number
+                  outputPrice:
+                    type: number
+                  currency:
+                    type: string
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        models:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [available, unavailable]
+              latency:
+                type: integer
+                description: Average latency in milliseconds
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+security:
+  - ApiKeyAuth: []
