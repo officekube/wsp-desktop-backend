@@ -1,12 +1,12 @@
 package workspaceEngine
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
 	"log"
 	"net/http"
+	"runtime"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -18,7 +18,6 @@ type IWorkspaceService interface {
 	GetStartupWorkflows(workspaceId string, accessToken string) ([]AWorkflow, *error)
 	GetUserToken(workspaceId string, wspEngineToken string) (string, *error)
 	GetWspEngineSettings(accessToken string, wspId string) ([]byte, error)
-	GetUpdateCheck(workspaceId string, updateCheckRequest *UpdateCheckRequest) (*UpdateCheckResponse, error)
 }
 
 type BaseWorkspaceService struct {
@@ -128,8 +127,9 @@ type UserTokenPayload struct {
 func (ws *BaseWorkspaceService) GetWspEngineSettings(accessToken string, wspId string) ([]byte, error) {
 	var result []byte
 	client := http.Client{}
-	//FIXME: change the wsp service endpoint to accept parameters of version and OS so that the service returns configuration that is version and OS specific.
-	req, err := http.NewRequest("GET", Configuration.WorkspaceService.Endpoint + "/workspaces/" + wspId + "/engine/settings", nil)
+	endpoint := Configuration.WorkspaceService.Endpoint + "/workspaces/" + wspId + "/engine/settings"
+	endpoint += "?version=" + Configuration.Engine.Version + "&type=" + runtime.GOOS
+	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		log.Println("Failed to prep a call to the workspace service /workspaces/engine/settings API.")
 		return result, err
@@ -152,46 +152,4 @@ func (ws *BaseWorkspaceService) GetWspEngineSettings(accessToken string, wspId s
 		result, _ := io.ReadAll(resp.Body)
 		return result, nil
 	}
-
-}
-
-func (ws *BaseWorkspaceService) GetUpdateCheck(workspaceId string, updateCheckRequest *UpdateCheckRequest) (*UpdateCheckResponse, error) {
-
-	jsonPayload, err := json.Marshal(updateCheckRequest)
-	if err != nil {
-		log.Println("Failed to marshal update check payload:", err)
-		return nil, err
-	}
-
-	client := http.Client{}
-	endpoint := Configuration.WorkspaceService.Endpoint;
-	req, err := http.NewRequest("POST", endpoint+"/workspaces/"+workspaceId+"/engine/checkupdate", bytes.NewBuffer(jsonPayload))
-	if err != nil {
-		log.Println("Failed to prep a call to the workspace service /workspaces/"+workspaceId+"/engine/checkupdate API:", err)
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println("Failed to call the workspace service /workspaces/"+workspaceId+"/engine/checkupdate API:", err)
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		log.Println("The workspace service /workspaces/"+workspaceId+"/engine/checkupdate API rejected with the message:", resp.Status)
-		return nil, errors.New("The workspace service /workspaces/"+workspaceId+"/engine/checkupdate API rejected with the message: "+resp.Status)
-	}
-
-	var updateResponse UpdateCheckResponse
-	bodyBytes, _ := io.ReadAll(resp.Body)
-	err = json.Unmarshal(bodyBytes, &updateResponse)
-	if err != nil {
-		log.Println("Failed to unmarshal update check response:", err)
-		return nil, err
-	}
-
-	return &updateResponse, nil
 }

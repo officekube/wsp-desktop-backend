@@ -26,8 +26,7 @@ type Routes []Route
 func NewEngine() *gin.Engine {
 	engine := gin.Default()
 	path, _ := Util.GetEngineInstallationPath()
-	//engine.LoadHTMLGlob(filepath.Join(path, "templates", "*"))
-	engine.LoadHTMLGlob(filepath.Join(path, "assets", "templates", "*"))
+	engine.LoadHTMLGlob(filepath.Join(path, "templates", "*"))
 
 	for _, route := range routes {
 		switch route.Method {

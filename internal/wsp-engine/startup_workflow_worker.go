@@ -42,7 +42,7 @@ func (sww *BaseStartupWorkflowWorker) Init() (err *error) {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 
-    go sww.StartNewVersionCheck("desktop")
+    go sww.StartNewVersionCheck("base")
 
 	return nil
 }
@@ -51,22 +51,13 @@ func (sww *BaseStartupWorkflowWorker) StartNewVersionCheck(wspType string) {
     ticker := time.NewTicker(NEWVERSIONCHECK_INTERVAL_IN_MINUTES * time.Minute)
     defer ticker.Stop()
 
-	// FIXME: Update the update table with the workspace type = "desktop"
     for {
         select {
         case <-sww.Context.Done():
-            //log.Println("NewVersionCheck stopped")
             return
         case <-ticker.C:
-			//log.Printf("The NewVersionCheck has started")
-			check := UpdateCheckRequest{
-				EngineVersion: 	Configuration.Engine.Version,
-				GuardVersion: 	Configuration.Guard.Version,
-				UIVersion:     	Configuration.Frontend.Version,
-				WspType:       	wspType,
-			}
 			um := NewUpdateManager()
-            um.CheckAndUpdate(Configuration.Workspace.Id, &check)
+            um.CheckAndUpdate()
         }
     }
 }

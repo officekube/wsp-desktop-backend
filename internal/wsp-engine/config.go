@@ -53,8 +53,7 @@ type ConfigurationInfo struct {
 	WorkflowEnvironmentVariables	[]WorkflowEnvironmentVarInfo
 	AppEnvironmentVariables      	[]AppEnvironmentVarInfo
 	PlatformPackageRepo          	PlatformPackageRepoInfo
-	// FIXME: rename gitlab to something like OKWorkflowPlatform, update the common settings in the workspace schema, and make sure the tokens only provide bare minimum.
-	Gitlab                       	GitlabInfo
+	OKWorkflowPlatform             	OKWorkflowPlatformInfo
 	TemplateSettings             	[]TemplateSettingInfo
 	AiService                    	AiServiceInfo
 	LoggingAgent				 	LoggingAgentInfo
@@ -157,7 +156,7 @@ type PlatformPackageRepoInfo struct {
 	UrlBase    string
 }
 
-type GitlabInfo struct {
+type OKWorkflowPlatformInfo struct {
 	BaseUrl                string
 	WorkflowRepoBranch     string
 	PlatformWorkflowsToken string
@@ -283,6 +282,19 @@ func (cgm *BaseConfigMgrClass) LoadWorkspaceConfigFromWorkspaceService(userToken
 	Configuration.Frontend.FirstTimeLaunched = oldFTLValue
 	Configuration.Frontend.FirstTimeDialogYTUrl = oldFTDUValue
 	Configuration.Frontend.Version = oldVValue
+	// Ensure that all folders referenced by relevant config settings exist
+	if _, err := os.Stat(Configuration.Database.Path); errors.Is(err, os.ErrNotExist) {
+		os.Mkdir(Configuration.Database.Path, os.ModePerm)
+	}
+	if _, err := os.Stat(Configuration.Workflow.InstallationFolder); errors.Is(err, os.ErrNotExist) {
+		os.Mkdir(Configuration.Workflow.InstallationFolder, os.ModePerm)
+	}
+	if _, err := os.Stat(Configuration.App.InstallationFolder); errors.Is(err, os.ErrNotExist) {
+		os.Mkdir(Configuration.App.InstallationFolder, os.ModePerm)
+	}
+	if _, err := os.Stat(Configuration.App.InstallationFolder); errors.Is(err, os.ErrNotExist) {
+		os.Mkdir(Configuration.App.InstallationFolder, os.ModePerm)
+	}
 	return nil
 }
 

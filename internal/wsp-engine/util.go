@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"syscall"
 
@@ -60,22 +61,28 @@ func (u *UtilClass) checkInstallPackage(name string, pType string, version strin
 	var stdChkBuffer bytes.Buffer
 	var checkCmdOutputStr string
 
+	shellCmd := "bash"
+	shellCmdArg := "-c"
+	grepCmd := "grep"
+	if runtime.GOOS == "windows" {
+		shellCmd = "cmd.exe"
+		shellCmdArg = "/C"
+		grepCmd = "findstr.exe"
+	}
 	// 1. Prepare a command to check if the package is already installed
 	switch pType {
 	case "npm":
 		if len(version) > 0 {
 			packageName += "@" + version
 		}
-		checkCmd = exec.Command("bash", "-c", "npm list -g | grep "+packageName)
-		//Testng npm
-		//checkCmd = exec.Command("bash", "-c", "npm list -g | grep yo@4.3.1")
+		checkCmd = exec.Command(shellCmd, shellCmdArg, "npm list -g | " + grepCmd + " " + packageName)
 	case "apt":
 		// Based on use of dpkg-query https://man7.org/linux/man-pages/man1/dpkg-query.1.html
-		var dpkgCmdStr = "dpkg-query -W --showformat='${Package}=>${Status}' " + packageName + "|grep \"install ok installed\""
+		var dpkgCmdStr = "dpkg-query -W --showformat='${Package}=>${Status}' " + packageName + "| " + grepCmd + " \"install ok installed\""
 		if len(version) > 0 {
-			dpkgCmdStr = "dpkg-query -W --showformat='${Package}=${Version}=>${Status}' " + packageName + "|grep \"" + version + "=>install ok installed\""
+			dpkgCmdStr = "dpkg-query -W --showformat='${Package}=${Version}=>${Status}' " + packageName + "| " + grepCmd + " \"" + version + "=>install ok installed\""
 		}
-		checkCmd = exec.Command("bash", "-c", dpkgCmdStr)
+		checkCmd = exec.Command(shellCmd, shellCmdArg, dpkgCmdStr)
 	case "pip":
 	case "pip3":
 		// The package name could be in the format package[option] which we do not need for the check
@@ -86,9 +93,11 @@ func (u *UtilClass) checkInstallPackage(name string, pType string, version strin
 		// its parent directory is not owned or is not writable by the current user.
 		// The cache has been disabled. Check the permissions and owner of that directory.
 		// If executing pip with sudo, you may want sudo's -H flag.'
-		// FIXME: OS dependent
-		var pipCmdStr = "sudo pip3 freeze |grep " + packageName
-		checkCmd = exec.Command("bash", "-c", pipCmdStr)
+		var pipCmdStr = "pip3 freeze | " + grepCmd + " " + packageName
+		if runtime.GOOS != "windows" {
+			pipCmdStr = "sudo " + pipCmdStr
+		}
+		checkCmd = exec.Command(shellCmd, shellCmdArg, pipCmdStr)
 	}
 
 	// 2. Check if the package is installed
@@ -119,7 +128,7 @@ func (u *UtilClass) checkInstallPackage(name string, pType string, version strin
 					case "pip":
 					case "pip3":
 						//if status == 256 {
-						if status.ExitStatus() == 256 { //FIXME: make sure it still works. It was modified to compile for windows
+						if status.ExitStatus() == 1 {
 							// In case of npm/pip3 it simply means that the package is not installed
 							reportError = false
 						}
@@ -147,7 +156,7 @@ func (u *UtilClass) checkInstallPackage(name string, pType string, version strin
 	case "npm":
 		if len(checkCmdOutputStr) == 0 {
 			// Package is not installed
-			installCmd = exec.Command("bash", "-c", "npm install -g "+packageName)
+			installCmd = exec.Command(shellCmd, shellCmdArg, "npm install -g " + packageName)
 			log.Println("The package " + packageName + " is not installed. Installing it...")
 		} else {
 			log.Println("The package " + packageName + " is already installed.")
@@ -159,14 +168,14 @@ func (u *UtilClass) checkInstallPackage(name string, pType string, version strin
 
 		if len(checkCmdOutputStr) == 0 {
 			// Package is not installed
-			installCmd = exec.Command("bash", "-c", "apt install -qy "+packageName)
+			installCmd = exec.Command(shellCmd, shellCmdArg, "apt install -qy " + packageName)
 			log.Println("The package " + packageName + " is not installed. Installing it...")
 		} else {
 			// There could be still the case when the package is not installed even if the checkCmdOutputStr is not empty.
 			var expectedStr = packageName + "=>install ok installed\n"
 			if expectedStr != checkCmdOutputStr {
 				// Package is not installed
-				installCmd = exec.Command("bash", "-c", "apt install -qy "+packageName)
+				installCmd = exec.Command(shellCmd, shellCmdArg, "apt install -qy " + packageName)
 				log.Println("The package " + packageName + " is not installed. Installing it...")
 			} else {
 				log.Println("The package " + packageName + " is already installed. ")
@@ -194,7 +203,7 @@ func (u *UtilClass) checkInstallPackage(name string, pType string, version strin
 		if len(checkCmdOutputStr) == 0 {
 			// Package is not installed
 			// https://stackoverflow.com/questions/8400382/python-pip-silent-install
-			installCmd = exec.Command("bash", "-c", "pip3 install "+packageName+" -q -q -q --exists-action i"+externalRepo)
+			installCmd = exec.Command(shellCmd, shellCmdArg, "pip3 install " + packageName + " -q -q -q --exists-action i" + externalRepo)
 			log.Println("The package " + packageName + " is not installed. Installing it...")
 		} else {
 			// There could be still the case when the package is not installed even if the checkCmdOutputStr is not empty.
@@ -209,7 +218,7 @@ func (u *UtilClass) checkInstallPackage(name string, pType string, version strin
 			} else {
 				// Package is not installed
 				// https://stackoverflow.com/questions/8400382/python-pip-silent-install
-				installCmd = exec.Command("bash", "-c", "pip3 install "+packageName+" -q -q -q --exists-action i"+externalRepo)
+				installCmd = exec.Command(shellCmd, shellCmdArg, "pip3 install " + packageName + " -q -q -q --exists-action i" + externalRepo)
 				log.Println("The package " + packageName + " is not installed. Installing it...")
 			}
 		}
@@ -271,44 +280,28 @@ func (u *UtilClass) CopyFile(src, dst string) (int64, error) {
 	return nBytes, err
 }
 
-func (u *UtilClass) InitCore(ginEngine *gin.Engine) *error {
+func (u *UtilClass) InitCore(ginEngine *gin.Engine) (*error) {
 	// 0. Initialize logger
 	err := InitBaseLoggingAgent()
 	if err != nil {
 		return err
 	}
 	// 1. Initialize Configuration Manager
-	if err2 := InitBaseConfigManager(); err2 != nil {
-		return &err2
-	}
+	if err2 := InitBaseConfigManager(); err2!= nil { return &err2 }
 	// 2. Initialize Security Manager
-	if err = InitBaseSecurityManager(ginEngine); err != nil {
-		return err
-	}
+	if err = InitBaseSecurityManager(ginEngine); err != nil { return err}
 	// 3. Initialize Workspace Service
-	if err = InitBaseWorkspaceService(); err != nil {
-		return err
-	}
+	if err = InitBaseWorkspaceService(); err != nil { return err}
 	// 4. Initialize the Startup Workflow worker
-	if err = InitBaseStartupWorkflowWorker(); err != nil {
-		return err
-	}
+	if err = InitBaseStartupWorkflowWorker(); err != nil { return err}
 	// 5. Initialize Error Handler
-	if err = InitBaseErrorHandler(); err != nil {
-		return err
-	}
+	if err = InitBaseErrorHandler(); err != nil { return err}
 	// 6. Initialize Workflow API Controller
-	if err = InitBaseWorkflowApiController(ginEngine); err != nil {
-		return err
-	}
+	if err = InitBaseWorkflowApiController(ginEngine); err != nil { return err}
 	// 7. Initialize App API Controller
-	if err = InitBaseAppApiController(ginEngine); err != nil {
-		return err
-	}
+	if err = InitBaseAppApiController(ginEngine); err != nil { return err}
 	// 8. Initialize Engine API Controoler
-	if err = InitBaseEngineApiController(ginEngine); err != nil {
-		return err
-	}
+	if err = InitBaseEngineApiController(ginEngine); err != nil { return err}
 
 	return nil
 }
@@ -336,10 +329,6 @@ func (u *UtilClass) GetVolumePath() (path string, err error) {
 func (u *UtilClass) GetEngineInstallationPath() (path string, err error) {
 	// The actual location of the engine may be different from the current directory. So, the logic to determine that should
 	// be placed in this method rather than relying on os.Getwd()
-	// TESTING
-	//path = "/usr/local/wsp-engine"
-	path = "d:\\Dropbox\\officekube\\repos\\workspace-engine"
-	/// TESTING
-	//path, err = os.Getwd()
+	path, err = os.Getwd()
 	return path, err
 }

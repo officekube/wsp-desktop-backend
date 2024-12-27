@@ -546,17 +546,17 @@ func (wac *BaseWorkflowApiController) WorkflowsViewPost(c *gin.Context) {
 		// Check README.rst in the platform-workflows group first
 		readmeType := 1 // rst
 		prjId := int(uWorkflow.Aworkflow.Id)
-		content, errCode := PlatformRepo.GetRepoFileContent(Configuration.Gitlab.PlatformWorkflowsToken, prjId, "README.rst")
+		content, errCode := PlatformRepo.GetRepoFileContent(Configuration.OKWorkflowPlatform.PlatformWorkflowsToken, prjId, "README.rst")
 		if errCode > 0 {
 			readmeType = 2 // md
-			content, errCode = PlatformRepo.GetRepoFileContent(Configuration.Gitlab.PlatformWorkflowsToken, prjId, "README.md")
+			content, errCode = PlatformRepo.GetRepoFileContent(Configuration.OKWorkflowPlatform.PlatformWorkflowsToken, prjId, "README.md")
 			if errCode > 0 {
 				// Now try the user-workflows group
 				readmeType = 1
-				content, errCode = PlatformRepo.GetRepoFileContent(Configuration.Gitlab.UserWorkflowsToken, prjId, "README.rst")
+				content, errCode = PlatformRepo.GetRepoFileContent(Configuration.OKWorkflowPlatform.UserWorkflowsToken, prjId, "README.rst")
 				if errCode > 0 {
 					readmeType = 2
-					content, errCode = PlatformRepo.GetRepoFileContent(Configuration.Gitlab.UserWorkflowsToken, prjId, "README.md")
+					content, errCode = PlatformRepo.GetRepoFileContent(Configuration.OKWorkflowPlatform.UserWorkflowsToken, prjId, "README.md")
 				}
 			}
 		}
@@ -581,7 +581,7 @@ func (wac *BaseWorkflowApiController) WorkflowsViewPost(c *gin.Context) {
 		if len(content) > 0 {
 			c.Data(http.StatusOK, "text/html", []byte(content))
 		} else {
-			c.Data(http.StatusNotFound, "text/html", []byte("readme not found because either passed in project id is not valid or the project does not have readme"))
+			c.Data(http.StatusNotFound, "text/html", []byte("readme not found because either passed in workflow id is not valid or the workflow does not have readme."))
 		}
 	} else if workflowType == "prompt" {
 		// 1. Check and, if needed, install the workflow or download inputView.ejs, inputContext.json, prompt.mustache?
