@@ -1,7 +1,6 @@
 package workspaceEngine
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -19,7 +18,6 @@ type IWorkspaceService interface {
 	GetStartupWorkflows(workspaceId string, accessToken string) ([]AWorkflow, *error)
 	GetUserToken(workspaceId string, wspEngineToken string) (string, *error)
 	GetWspEngineSettings(accessToken string, wspId string) ([]byte, error)
-	GetUpdateCheck(workspaceId string, updateCheckRequest *UpdateCheckRequest) (*UpdateCheckResponse, error)
 }
 
 type BaseWorkspaceService struct {
@@ -155,45 +153,4 @@ func (ws *BaseWorkspaceService) GetWspEngineSettings(accessToken string, wspId s
 		return result, nil
 	}
 
-}
-
-func (ws *BaseWorkspaceService) GetUpdateCheck(workspaceId string, updateCheckRequest *UpdateCheckRequest) (*UpdateCheckResponse, error) {
-
-	jsonPayload, err := json.Marshal(updateCheckRequest)
-	if err != nil {
-		log.Println("Failed to marshal update check payload:", err)
-		return nil, err
-	}
-
-	client := http.Client{}
-	endpoint := Configuration.WorkspaceService.Endpoint;
-	req, err := http.NewRequest("POST", endpoint+"/workspaces/"+workspaceId+"/engine/checkupdate", bytes.NewBuffer(jsonPayload))
-	if err != nil {
-		log.Println("Failed to prep a call to the workspace service /workspaces/"+workspaceId+"/engine/checkupdate API:", err)
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println("Failed to call the workspace service /workspaces/"+workspaceId+"/engine/checkupdate API:", err)
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		log.Println("The workspace service /workspaces/"+workspaceId+"/engine/checkupdate API rejected with the message:", resp.Status)
-		return nil, errors.New("The workspace service /workspaces/"+workspaceId+"/engine/checkupdate API rejected with the message: "+resp.Status)
-	}
-
-	var updateResponse UpdateCheckResponse
-	bodyBytes, _ := io.ReadAll(resp.Body)
-	err = json.Unmarshal(bodyBytes, &updateResponse)
-	if err != nil {
-		log.Println("Failed to unmarshal update check response:", err)
-		return nil, err
-	}
-
-	return &updateResponse, nil
 }

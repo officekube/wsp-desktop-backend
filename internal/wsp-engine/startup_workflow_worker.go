@@ -56,14 +56,8 @@ func (sww *BaseStartupWorkflowWorker) StartNewVersionCheck(wspType string) {
         case <-sww.Context.Done():
             return
         case <-ticker.C:
-			check := UpdateCheckRequest{
-				EngineVersion: 	Configuration.Engine.Version,
-				GuardVersion: 	Configuration.Guard.Version,
-				UIVersion:     	Configuration.Frontend.Version,
-				WspType:       	wspType,
-			}
 			um := NewUpdateManager()
-            um.CheckAndUpdate(Configuration.Workspace.Id, &check)
+            um.CheckAndUpdate()
         }
     }
 }

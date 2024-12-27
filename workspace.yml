@@ -1,0 +1,29 @@
+accountservice:
+  endpoint: https://portal.dev.officekube.io/acctsvc/api
+engine:
+  version: 0.0.5
+frontend:
+  firsttimelaunched: true
+  version: 0.0.7
+guard:
+  version: 0.0.1
+officekubeidp:
+  realm: officekube-dev
+  urlbase: https://auth.officekube.io
+security:
+  oauth2:
+    apiredirecturl: https://a44ec0e8-2f7f-4f3e-9279-5ca6d4c4a5d5.dev.officekube.io/wui/api/auth_callback
+    clientid: platform
+    issuerurl: https://auth.officekube.io/realms/officekube-dev
+    scopes:
+    - openid
+    - email
+    - profile
+    urlbase: https://a44ec0e8-2f7f-4f3e-9279-5ca6d4c4a5d5.dev.officekube.io/wui
+    webredirecturl: https://a44ec0e8-2f7f-4f3e-9279-5ca6d4c4a5d5.dev.officekube.io/wui/web/auth_callback
+workspace:
+  domain: a44ec0e8-2f7f-4f3e-9279-5ca6d4c4a5d5.dev.officekube.io
+  firsttimelaunched: 2
+  id: a44ec0e8-2f7f-4f3e-9279-5ca6d4c4a5d5
+workspaceservice:
+  endpoint: https://portal.dev.officekube.io/wspsvc/api

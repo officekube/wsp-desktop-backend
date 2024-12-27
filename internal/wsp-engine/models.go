@@ -137,22 +137,3 @@ type WorkflowEstimate struct {
 	Status	string
 	Message	string
 }
-
-type UpdateCheckRequest struct {
-	EngineVersion 	string `json:"engineVersion"`
-	GuardVersion 	string `json:"guardVersion"`
-	UIVersion     	string `json:"uiVersion"`
-	WspType       	string `json:"wspType"`
-}
-
-type UpdateCheckResponse struct {
-	EngineUpdateAvailable bool   `json:"engineUpdateAvailable"`
-	EngineDownloadUrl     string `json:"engineDownloadUrl"`
-	EngineVersion     	  string `json:"engineVersion"`
-	GuardUpdateAvailable bool   `json:"guardUpdateAvailable"`
-	GuardDownloadUrl     string `json:"guardDownloadUrl"`
-	GuardVersion     	  string `json:"guardVersion"`
-	UIUpdateAvailable     bool   `json:"uiUpdateAvailable"`
-	UIDownloadUrl         string `json:"uiDownloadUrl"`
-	UIVersion		       string `json:"uiVersion"`
-}

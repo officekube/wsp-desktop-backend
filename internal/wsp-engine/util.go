@@ -330,10 +330,6 @@ func (u *UtilClass) GetVolumePath() (path string, err error) {
 func (u *UtilClass) GetEngineInstallationPath() (path string, err error) {
 	// The actual location of the engine may be different from the current directory. So, the logic to determine that should
 	// be placed in this method rather than relying on os.Getwd()
-	// TESTING
-	//path = "/usr/local/wsp-engine"
-	//path = "d:\\Dropbox\\officekube\\repos\\workspace-engine"
-	/// TESTING
 	path, err = os.Getwd()
 	return path, err
 }
