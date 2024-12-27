@@ -282,7 +282,6 @@ func (cgm *BaseConfigMgrClass) LoadWorkspaceConfigFromWorkspaceService(userToken
 	Configuration.Frontend.FirstTimeLaunched = oldFTLValue
 	Configuration.Frontend.FirstTimeDialogYTUrl = oldFTDUValue
 	Configuration.Frontend.Version = oldVValue
-
 	// Ensure that all folders referenced by relevant config settings exist
 	if _, err := os.Stat(Configuration.Database.Path); errors.Is(err, os.ErrNotExist) {
 		os.Mkdir(Configuration.Database.Path, os.ModePerm)
