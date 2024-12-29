@@ -26,6 +26,15 @@ type ISecurityManager interface {
 	GetOAuth2Config() *oauth2.Config
 }
 
+type User struct {
+    Id          string  `json:"sub"`
+    Email       string
+    Name        string
+    FirstName   string  `json:"given_name"`
+    LastName    string  `json:"family_name"`
+    Username    string  `json:"preferred_username"`
+}
+
 type BaseSecurityManager struct {
 	ISecurityManager
 	BearerToken string
@@ -35,6 +44,8 @@ type BaseSecurityManager struct {
 
 //var SecurityManager = &BaseSecurityManager{}
 var SecurityManager ISecurityManager
+
+var UserAuthentication = Auth{}
 
 func InitBaseSecurityManager(ginEngine *gin.Engine) *error {
 	SecurityManager = &BaseSecurityManager{}
@@ -147,7 +158,6 @@ func (sm *BaseSecurityManager) IsApiAuthenticated(c *gin.Context) int {
 /**
  * The callback method for the web resources/URLs that does these things:
  * 1. Validates if the IdP has returned all the right things: state, code, and id_token.
- * This is as per https://stackoverflow.com/questions/46844285/difference-between-oauth-2-0-state-and-openid-nonce-parameter-why-state-cou.
  * 2. Validate the id_token
  * 3. Redirect a user to the originally requested url with the id_token attached as a cookie.
  */
@@ -236,7 +246,6 @@ func (sm *BaseSecurityManager) WebAuthCallback(c *gin.Context) {
 /**
  * The callback method for the API resources/URLs that does these things:
  * 1. Validates if the IdP has returned all the right things: state, code, and id_token.
- * This is as per https://stackoverflow.com/questions/46844285/difference-between-oauth-2-0-state-and-openid-nonce-parameter-why-state-cou.
  * 2. Validate the id_token
  * 3. Sets the id_token in the authorization header as a bearer token
  */
@@ -348,17 +357,6 @@ func (sm *BaseSecurityManager) GetLoggedOnUser(bearer_token string) *User {
     idToken.Claims(&user)
     return &user
 }
-
-type User struct {
-    Id          string  `json:"sub"`
-    Email       string
-    Name        string
-    FirstName   string  `json:"given_name"`
-    LastName    string  `json:"family_name"`
-    Username    string  `json:"preferred_username"`
-    GitlabId    int  `json:"gitlabid"`
-}
-
 
 func (sm *BaseSecurityManager) GetOAuth2Config() *oauth2.Config {
 	return &sm.OAuth2Config
