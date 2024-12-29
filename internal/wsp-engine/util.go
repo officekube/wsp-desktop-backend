@@ -69,6 +69,7 @@ func (u *UtilClass) checkInstallPackage(name string, pType string, version strin
 		shellCmdArg = "/C"
 		grepCmd = "findstr.exe"
 	}
+
 	// 1. Prepare a command to check if the package is already installed
 	switch pType {
 	case "npm":

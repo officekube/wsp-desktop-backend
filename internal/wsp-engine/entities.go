@@ -79,3 +79,9 @@ type AppParameter struct {
 	Masked        bool           `json:"masked,omitempty"`
 	ActualValues  pq.StringArray `gorm:"type:text[]" json:"actual_values,omitempty"`
 }
+
+type Auth struct {
+	UserID      string
+	Username 	string
+	AccessToken string
+}

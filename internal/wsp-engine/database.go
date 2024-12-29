@@ -18,7 +18,7 @@ func GetDBConnection() (db *gorm.DB, err error) {
 			return db, err
 		} else {
 			// 2. Make sure all relevant tables exist
-			db.AutoMigrate(&Workflow{}, &WorkflowSchedule{}, &WorkflowParameter{}, &App{}, &AppParameter{})
+			db.AutoMigrate(&Workflow{}, &WorkflowSchedule{}, &WorkflowParameter{}, &App{}, &AppParameter{}, &Auth{})
 			dbConnection = db
 		}
 	}

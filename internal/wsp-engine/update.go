@@ -16,6 +16,7 @@ func NewUpdateManager() *UpdateManagerClass {
 	return updateManager
 }
 
+
 func (um *UpdateManagerClass) CheckAndUpdate() {
 	// Implement once the GitHub CD/release pipelines are in place
 }
