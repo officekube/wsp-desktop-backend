@@ -92,3 +92,4 @@ jitdump*.dmp
 ######################
 /.idea/
 /.vscode/
+go.sum
