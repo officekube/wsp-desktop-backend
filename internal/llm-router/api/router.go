@@ -26,6 +26,7 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 	// Initialize providers
 	providers := map[string]llm.Provider{
 		"openai": llm.NewOpenAIProvider(cfg.OpenAIKey, "gpt-4"),
+		"claude": llm.NewAnthropicProvider(cfg.AnthropicKey, "claude-2"),
 		//TODO: Add more providers as needed
 	}
 
