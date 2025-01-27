@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"workspace-engine/internal/llm-router/api"
@@ -10,7 +11,7 @@ import (
 
 func main() {
 	// Initialize configuration
-	cfg, err := config.Load()
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
@@ -22,8 +23,9 @@ func main() {
 	router := api.NewRouter(cfg)
 
 	// Start server
-	logger.Info("Starting server on ", cfg.Port)
-	if err := router.Run(":" + cfg.Port); err != nil {
+	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
+	logger.Info("Starting server", "address", addr)
+	if err := router.Run(addr); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
 }
