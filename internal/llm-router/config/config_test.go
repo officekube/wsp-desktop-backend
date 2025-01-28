@@ -17,6 +17,7 @@ func TestLoadConfig(t *testing.T) {
 	assert.Equal(t, 8081, cfg.Server.Port)
 	assert.Equal(t, "localhost", cfg.Server.Host)
 	assert.Equal(t, 5*time.Second, cfg.Server.Timeout)
+	assert.Equal(t, "development", cfg.Server.Environment)
 
 	// Test OpenAI provider config
 	assert.True(t, cfg.Providers.OpenAI.Enabled)

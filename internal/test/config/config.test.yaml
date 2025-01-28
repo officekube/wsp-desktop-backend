@@ -2,6 +2,7 @@ server:
   port: 8081
   host: "localhost"
   timeout: 5s
+  environment: "development"
   cors:
     enabled: true
     allowed_origins:

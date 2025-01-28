@@ -10,7 +10,7 @@ import (
 
 func NewRouter(cfg *config.Config) *gin.Engine {
 	// Set Gin mode
-	if cfg.Environment == "production" {
+	if cfg.Server.Environment == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -25,9 +25,23 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 
 	// Initialize providers
 	providers := map[string]llm.Provider{
-		"openai": llm.NewOpenAIProvider(cfg.OpenAIKey, "gpt-4"),
-		"claude": llm.NewAnthropicProvider(cfg.AnthropicKey, "claude-2"),
 		//TODO: Add more providers as needed
+	}
+
+	openAI := cfg.Providers.OpenAI
+	if openAI.Enabled {
+		providers["openai_default"] = llm.NewOpenAIProvider(openAI.APIKey, openAI.DefaultModel)
+		for _, model := range openAI.Models {
+			providers["openai_"+model.Name] = llm.NewOpenAIProvider(openAI.APIKey, model.Name)
+		}
+	}
+
+	anthropic := cfg.Providers.Anthropic
+	if anthropic.Enabled {
+		providers["anthropic_default"] = llm.NewAnthropicProvider(anthropic.APIKey, anthropic.DefaultModel)
+		for _, model := range anthropic.Models {
+			providers["anthropic_"+model.Name] = llm.NewAnthropicProvider(anthropic.APIKey, model.Name)
+		}
 	}
 
 	// Initialize services

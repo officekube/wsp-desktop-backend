@@ -14,10 +14,11 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port    int           `mapstructure:"port"`
-	Host    string        `mapstructure:"host"`
-	Timeout time.Duration `mapstructure:"timeout"`
-	CORS    CORSConfig    `mapstructure:"cors"`
+	Port        int           `mapstructure:"port"`
+	Host        string        `mapstructure:"host"`
+	Timeout     time.Duration `mapstructure:"timeout"`
+	CORS        CORSConfig    `mapstructure:"cors"`
+	Environment string        `mapstructure:"environment"`
 }
 
 type CORSConfig struct {
