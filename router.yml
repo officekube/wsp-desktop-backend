@@ -36,3 +36,20 @@ providers:
       - name: "claude-instant-1"
         max_tokens: 100000
         timeout: 15s
+  openrouter:
+    enabled: true
+    api_key: "${OPENROUTER_API_KEY}"
+    default_model: "openai/gpt-3.5-turbo"
+    models:
+      - name: "openai/gpt-4"
+        max_tokens: 8192
+        timeout: 30s
+      - name: "openai/gpt-3.5-turbo"
+        max_tokens: 4096
+        timeout: 15s
+      - name: "anthropic/claude-2"
+        max_tokens: 100000
+        timeout: 30s
+      - name: "google/palm-2"
+        max_tokens: 8192
+        timeout: 30s

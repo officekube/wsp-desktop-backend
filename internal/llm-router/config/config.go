@@ -28,8 +28,9 @@ type CORSConfig struct {
 }
 
 type ProvidersConfig struct {
-	OpenAI    ProviderConfig `mapstructure:"openai"`
-	Anthropic ProviderConfig `mapstructure:"anthropic"`
+	OpenAI     ProviderConfig `mapstructure:"openai"`
+	Anthropic  ProviderConfig `mapstructure:"anthropic"`
+	OpenRouter ProviderConfig `mapstructure:"openrouter"`
 }
 
 type ProviderConfig struct {

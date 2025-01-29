@@ -44,6 +44,20 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 		}
 	}
 
+	openRouter := cfg.Providers.OpenRouter
+	if openRouter.Enabled {
+		httpHeaders := map[string]string{
+			"HTTP-Referer": "officekube.io",
+			"X-Title":      "LLM Router",
+		}
+		providers["openrouter_default"] = llm.NewOpenRouterProvider(
+			openRouter.APIKey, openRouter.DefaultModel, httpHeaders,
+		)
+		for _, model := range anthropic.Models {
+			providers["openrouter_"+model.Name] = llm.NewOpenRouterProvider(openRouter.APIKey, model.Name, httpHeaders)
+		}
+	}
+
 	// Initialize services
 	routerService := service.NewRouterService(providers)
 	handler := NewHandler(routerService)
