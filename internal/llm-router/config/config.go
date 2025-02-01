@@ -31,6 +31,7 @@ type ProvidersConfig struct {
 	OpenAI     ProviderConfig `mapstructure:"openai"`
 	Anthropic  ProviderConfig `mapstructure:"anthropic"`
 	OpenRouter ProviderConfig `mapstructure:"openrouter"`
+	Groq       ProviderConfig `mapstructure:"groq"`
 }
 
 type ProviderConfig struct {

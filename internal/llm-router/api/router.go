@@ -24,9 +24,7 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 	router.Use(CORSMiddleware())
 
 	// Initialize providers
-	providers := map[string]llm.Provider{
-		//TODO: Add more providers as needed
-	}
+	providers := map[string]llm.Provider{}
 
 	openAI := cfg.Providers.OpenAI
 	if openAI.Enabled {
@@ -53,8 +51,16 @@ func NewRouter(cfg *config.Config) *gin.Engine {
 		providers["openrouter_default"] = llm.NewOpenRouterProvider(
 			openRouter.APIKey, openRouter.DefaultModel, httpHeaders,
 		)
-		for _, model := range anthropic.Models {
+		for _, model := range openRouter.Models {
 			providers["openrouter_"+model.Name] = llm.NewOpenRouterProvider(openRouter.APIKey, model.Name, httpHeaders)
+		}
+	}
+
+	groq := cfg.Providers.Groq
+	if groq.Enabled {
+		providers["groq_default"] = llm.NewGroqProvider(groq.APIKey, groq.DefaultModel)
+		for _, model := range groq.Models {
+			providers["groq_"+model.Name] = llm.NewGroqProvider(groq.APIKey, model.Name)
 		}
 	}
 
