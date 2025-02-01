@@ -87,4 +87,9 @@ jitdump*.dmp
 /config/
 /.local/
 /.cache/
-
+######################
+# IDE Configs
+######################
+/.idea/
+/.vscode/
+go.sum

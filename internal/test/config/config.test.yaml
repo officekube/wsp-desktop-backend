@@ -1,0 +1,28 @@
+server:
+  port: 8081
+  host: "localhost"
+  timeout: 5s
+  environment: "development"
+  cors:
+    enabled: true
+    allowed_origins:
+      - "http://localhost:3000"
+    allowed_methods:
+      - "GET"
+      - "POST"
+
+providers:
+  openai:
+    enabled: true
+    api_key: "test-key"
+    default_model: "gpt-3.5-turbo"
+    models:
+      - name: "gpt-3.5-turbo"
+        max_tokens: 4096
+        timeout: 5s
+
+  anthropic:
+    enabled: false
+    api_key: ""
+    default_model: ""
+    models: []
